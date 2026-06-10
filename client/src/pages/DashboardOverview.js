@@ -1,0 +1,264 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+import { useNotification } from '../components/NotificationProvider';
+
+function DashboardOverview() {
+  const { showToast, confirm } = useNotification();
+  const [stats, setStats] = useState({
+    totalDonors: 0,
+    totalDonations: 0,
+    totalHospitals: 0,
+    pendingRequests: 0,
+    lowStockAlertsCount: 0,
+    lowStockAlerts: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
+
+  const fetchStats = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/stats');
+      setStats(res.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching statistics:', err);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const handleSeed = () => {
+    confirm(
+      'This will reset the database and seed fresh dummy data. Proceed?',
+      async () => {
+        setSeeding(true);
+        try {
+          const res = await axios.post('http://localhost:5000/api/seed');
+          showToast(res.data.message || 'Database seeded successfully!', 'success');
+          fetchStats();
+        } catch (err) {
+          showToast('Seeding failed: ' + err.message, 'error');
+        } finally {
+          setSeeding(false);
+        }
+      },
+      'Database Seeder Reset'
+    );
+  };
+
+  if (loading) {
+    return <div className="container"><p style={{ textAlign: 'center' }}>Loading dashboard analytics...</p></div>;
+  }
+
+  return (
+    <div className="container">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Blood Bank Dashboard</h1>
+          <p className="page-subtitle">Real-time status overview of the Blood Bank Management System</p>
+        </div>
+        <button 
+          onClick={handleSeed} 
+          className="btn btn-secondary"
+          disabled={seeding}
+        >
+          {seeding ? 'Seeding Database...' : '🔄 Reset & Seed Database'}
+        </button>
+      </div>
+
+      {stats.lowStockAlertsCount > 0 && (
+        <div style={{
+          background: '#fff0f0',
+          border: '1px solid #ffccd0',
+          borderRadius: '8px',
+          padding: '16px 24px',
+          color: '#d90429',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px'
+        }}>
+          <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            ⚠️ Low Stock Alerts
+          </h3>
+          <p style={{ margin: 0, fontSize: '0.95rem' }}>
+            The following blood groups have units available below the safety threshold (6 units):{' '}
+            <strong>{stats.lowStockAlerts.join(', ')}</strong>. Please prioritize donations for these types.
+          </p>
+        </div>
+      )}
+
+      {/* 📊 DBMS Stats Grid */}
+      <div className="stats-grid">
+        <div className="stats-card info">
+          <span className="stats-title">Registered Donors</span>
+          <span className="stats-value">{stats.totalDonors}</span>
+          <span className="stats-desc">Active database donor records</span>
+        </div>
+        <div className="stats-card success">
+          <span className="stats-title">Total Donations</span>
+          <span className="stats-value">{stats.totalDonations}</span>
+          <span className="stats-desc">Total donations recorded</span>
+        </div>
+        <div className="stats-card info">
+          <span className="stats-title">Hospitals Registered</span>
+          <span className="stats-value">{stats.totalHospitals}</span>
+          <span className="stats-desc">Partner medical facilities</span>
+        </div>
+        <div className="stats-card warning">
+          <span className="stats-title">Pending Requests</span>
+          <span className="stats-value">{stats.pendingRequests}</span>
+          <span className="stats-desc">Requests awaiting approval</span>
+        </div>
+      </div>
+
+      {/* 💡 Did You Know / Facts Grid */}
+      <div className="card">
+        <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '8px' }}>
+          💡 Blood Donation Facts
+        </h2>
+        <div className="facts-grid">
+          <div className="fact-item">
+            <span className="fact-icon">🎁</span>
+            <span className="fact-title">Save Up To Three Lives</span>
+            <span className="fact-text">
+              A single blood donation can save up to three lives. The donated unit is typically separated into individual components: red cells, plasma, and platelets.
+            </span>
+          </div>
+          <div className="fact-item">
+            <span className="fact-icon">⏱️</span>
+            <span className="fact-title">Every 2 Seconds</span>
+            <span className="fact-text">
+              Every two seconds, someone in the world needs a blood transfusion. It is critical for traumatic injury cases, cancer therapies, and complicated surgeries.
+            </span>
+          </div>
+          <div className="fact-item">
+            <span className="fact-icon">🌎</span>
+            <span className="fact-title">Universal Recipient & Donor</span>
+            <span className="fact-text">
+              <strong>O-Negative</strong> is the universal red blood cell donor type (safe for anyone), while <strong>AB-Positive</strong> is the universal recipient type (can accept any blood).
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 📊 Compatibility Matrix */}
+      <div className="card">
+        <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '8px' }}>
+          🩸 Blood Compatibility Matrix
+        </h2>
+        <p style={{ fontSize: '0.9rem', color: 'var(--text-light)', marginBottom: '16px' }}>
+          Understanding blood type compatibility is crucial for emergency transfusions and inventory forecasting in database records.
+        </p>
+        <div className="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: '120px' }}>Blood Type</th>
+                <th>Can Donate To (Red Cells)</th>
+                <th>Can Receive From (Red Cells)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>A+</strong></td>
+                <td>A+, AB+</td>
+                <td>A+, A-, O+, O-</td>
+              </tr>
+              <tr>
+                <td><strong>A-</strong></td>
+                <td>A+, A-, AB+, AB-</td>
+                <td>A-, O-</td>
+              </tr>
+              <tr>
+                <td><strong>B+</strong></td>
+                <td>B+, AB+</td>
+                <td>B+, B-, O+, O-</td>
+              </tr>
+              <tr>
+                <td><strong>B-</strong></td>
+                <td>B+, B-, AB+, AB-</td>
+                <td>B-, O-</td>
+              </tr>
+              <tr>
+                <td><strong>AB+</strong></td>
+                <td>AB+ <i>(Universal Recipient)</i></td>
+                <td>Everyone <i>(A+, A-, B+, B-, AB+, AB-, O+, O-)</i></td>
+              </tr>
+              <tr>
+                <td><strong>AB-</strong></td>
+                <td>AB+, AB-</td>
+                <td>AB-, A-, B-, O-</td>
+              </tr>
+              <tr>
+                <td><strong>O+</strong></td>
+                <td>O+, A+, B+, AB+</td>
+                <td>O+, O-</td>
+              </tr>
+              <tr>
+                <td><strong>O-</strong></td>
+                <td>Everyone <i>(Universal Donor)</i></td>
+                <td>O-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 🚶 The Donation Journey */}
+      <div className="card">
+        <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '8px' }}>
+          🚶 The Donation Journey Pathway
+        </h2>
+        <div className="journey-timeline">
+          <div className="journey-step">
+            <span className="step-number">1</span>
+            <div className="step-title">Donor Registration</div>
+            <div className="step-desc">Register demographic data in our DBMS directory database.</div>
+          </div>
+          <div className="journey-step">
+            <span className="step-number">2</span>
+            <div className="step-title">Health Screen</div>
+            <div className="step-desc">A brief check of pulse, blood pressure, temperature, and hemoglobin.</div>
+          </div>
+          <div className="journey-step">
+            <span className="step-number">3</span>
+            <div className="step-title">The Donation</div>
+            <div className="step-desc">Takes about 8-10 minutes to safely draw 1 unit of blood.</div>
+          </div>
+          <div className="journey-step">
+            <span className="step-number">4</span>
+            <div className="step-title">Recovery Snacks</div>
+            <div className="step-desc">Rest for 10-15 minutes and enjoy cookies and drinks.</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ⚙️ Operations Quick Links */}
+      <div className="card">
+        <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '8px' }}>
+          Blood Bank Operations Quick Links
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+          <Link to="/inventory" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+            📊 View Inventory Stock
+          </Link>
+          <Link to="/donors" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+            🧑 Add / Manage Donors
+          </Link>
+          <Link to="/donations" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+            💉 Record New Donation
+          </Link>
+          <Link to="/requests" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+            📋 Approve Hospital Requests
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default DashboardOverview;
