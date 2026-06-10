@@ -16,7 +16,7 @@ function HospitalManagement() {
 
   const fetchHospitals = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/hospitals');
+      const res = await axios.get('/api/hospitals');
       setHospitals(res.data);
       setLoading(false);
     } catch (err) {
@@ -33,7 +33,7 @@ function HospitalManagement() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.post('http://localhost:5000/api/hospitals', {
+      await axios.post('/api/hospitals', {
         hospitalName,
         contactPerson,
         phone,
@@ -57,7 +57,7 @@ function HospitalManagement() {
       `Are you sure you want to permanently delete hospital "${name}"?`,
       async () => {
         try {
-          await axios.delete(`http://localhost:5000/api/hospitals/${id}`);
+          await axios.delete(`/api/hospitals/${id}`);
           showToast(`Hospital "${name}" record deleted successfully.`, 'success');
           fetchHospitals();
         } catch (err) {

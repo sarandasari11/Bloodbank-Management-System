@@ -18,8 +18,8 @@ function RequestManagement() {
   const fetchData = async () => {
     try {
       const [requestsRes, hospitalsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/requests'),
-        axios.get('http://localhost:5000/api/hospitals')
+        axios.get('/api/requests'),
+        axios.get('/api/hospitals')
       ]);
       setRequests(requestsRes.data);
       setHospitals(hospitalsRes.data);
@@ -45,7 +45,7 @@ function RequestManagement() {
     }
     setSubmitting(true);
     try {
-      await axios.post('http://localhost:5000/api/requests', {
+      await axios.post('/api/requests', {
         hospitalId: selectedHospitalId,
         bloodGroup,
         unitsRequired: parseInt(unitsRequired),
@@ -63,7 +63,7 @@ function RequestManagement() {
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/requests/${id}`, {
+      const res = await axios.put(`/api/requests/${id}`, {
         status: newStatus
       });
       showToast(res.data.message || `Request status set to ${newStatus}.`, 'success');
@@ -78,7 +78,7 @@ function RequestManagement() {
       'Are you sure you want to permanently delete this request record? Any approved units will be returned to inventory.',
       async () => {
         try {
-          await axios.delete(`http://localhost:5000/api/requests/${id}`);
+          await axios.delete(`/api/requests/${id}`);
           showToast('Request record deleted successfully.', 'success');
           fetchData();
         } catch (err) {

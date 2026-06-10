@@ -17,8 +17,8 @@ function DonationManagement() {
   const fetchData = async () => {
     try {
       const [donationsRes, donorsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/donations'),
-        axios.get('http://localhost:5000/api/donors')
+        axios.get('/api/donations'),
+        axios.get('/api/donors')
       ]);
       setDonations(donationsRes.data);
       setDonors(donorsRes.data);
@@ -44,7 +44,7 @@ function DonationManagement() {
     }
     setSubmitting(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/donations', {
+      const res = await axios.post('/api/donations', {
         donorId: selectedDonorId,
         unitsDonated: parseInt(unitsDonated),
         donationDate: new Date(donationDate)

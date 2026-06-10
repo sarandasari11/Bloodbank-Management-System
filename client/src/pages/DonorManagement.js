@@ -20,7 +20,7 @@ function DonorManagement() {
 
   const fetchDonors = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/donors');
+      const res = await axios.get('/api/donors');
       setDonors(res.data);
       setLoading(false);
     } catch (err) {
@@ -37,7 +37,7 @@ function DonorManagement() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.post('http://localhost:5000/api/donors', {
+      await axios.post('/api/donors', {
         name,
         age: parseInt(age),
         gender,
@@ -66,7 +66,7 @@ function DonorManagement() {
       `Are you sure you want to permanently delete donor "${donorName}"?`,
       async () => {
         try {
-          await axios.delete(`http://localhost:5000/api/donors/${id}`);
+          await axios.delete(`/api/donors/${id}`);
           showToast(`Donor "${donorName}" record has been deleted.`, 'success');
           fetchDonors();
         } catch (err) {

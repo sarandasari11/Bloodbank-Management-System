@@ -14,7 +14,7 @@ function InventoryManagement() {
 
   const fetchInventory = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/inventory');
+      const res = await axios.get('/api/inventory');
       setInventory(res.data);
       setLoading(false);
     } catch (err) {
@@ -31,7 +31,7 @@ function InventoryManagement() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.put('http://localhost:5000/api/inventory/manual', {
+      await axios.put('/api/inventory/manual', {
         bloodGroup,
         unitsAvailable
       });

@@ -18,7 +18,7 @@ function DashboardOverview() {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/stats');
+      const res = await axios.get('/api/stats');
       setStats(res.data);
       setLoading(false);
     } catch (err) {
@@ -37,7 +37,7 @@ function DashboardOverview() {
       async () => {
         setSeeding(true);
         try {
-          const res = await axios.post('http://localhost:5000/api/seed');
+          const res = await axios.post('/api/seed');
           showToast(res.data.message || 'Database seeded successfully!', 'success');
           fetchStats();
         } catch (err) {
