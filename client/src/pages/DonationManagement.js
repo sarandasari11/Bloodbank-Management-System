@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNotification } from '../components/NotificationProvider';
+import { useData } from '../components/DataContext';
 
 function DonationManagement() {
   const { showToast } = useNotification();
-  const [donations, setDonations] = useState([]);
-  const [donors, setDonors] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { 
+    donations, fetchDonations, loadingDonations,
+    donors, fetchDonors, loadingDonors,
+    fetchStats, fetchInventory 
+  } = useData();
 
   // Form state
   const [selectedDonorId, setSelectedDonorId] = useState('');
@@ -14,28 +17,18 @@ function DonationManagement() {
   const [donationDate, setDonationDate] = useState(new Date().toISOString().split('T')[0]);
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchData = async () => {
-    try {
-      const [donationsRes, donorsRes] = await Promise.all([
-        axios.get('/api/donations'),
-        axios.get('/api/donors')
-      ]);
-      setDonations(donationsRes.data);
-      setDonors(donorsRes.data);
-      if (donorsRes.data.length > 0 && !selectedDonorId) {
-        setSelectedDonorId(donorsRes.data[0]._id);
-      }
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching donations data:', err);
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
+    fetchDonations();
+    fetchDonors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Set default donor when donors load
+  useEffect(() => {
+    if (donors.length > 0 && !selectedDonorId) {
+      setSelectedDonorId(donors[0]._id);
+    }
+  }, [donors, selectedDonorId]);
 
   const handleRecordDonation = async (e) => {
     e.preventDefault();
@@ -52,7 +45,12 @@ function DonationManagement() {
       });
       showToast(res.data.message || 'Donation recorded and inventory updated!', 'success');
       setUnitsDonated(1);
-      fetchData();
+      
+      // Refresh cache
+      fetchDonations();
+      fetchDonors();
+      fetchStats();
+      fetchInventory();
     } catch (err) {
       showToast('Error recording donation: ' + (err.response?.data?.error || err.message), 'error');
     } finally {
@@ -71,7 +69,7 @@ function DonationManagement() {
     return d ? d.bloodGroup : '';
   };
 
-  if (loading) {
+  if ((loadingDonations && donations.length === 0) || (loadingDonors && donors.length === 0)) {
     return <div className="container"><p style={{ textAlign: 'center' }}>Loading donations logs...</p></div>;
   }
 

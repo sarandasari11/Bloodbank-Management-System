@@ -1,30 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNotification } from '../components/NotificationProvider';
+import { useData } from '../components/DataContext';
 
 function InventoryManagement() {
   const { showToast } = useNotification();
-  const [inventory, setInventory] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { inventory, fetchInventory, loadingInventory } = useData();
   
   // Form state
   const [bloodGroup, setBloodGroup] = useState('A+');
   const [unitsAvailable, setUnitsAvailable] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchInventory = async () => {
-    try {
-      const res = await axios.get('/api/inventory');
-      setInventory(res.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching inventory:', err);
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchInventory();
+    fetchInventory(); // Background refresh
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleManualUpdate = async (e) => {
@@ -36,7 +26,7 @@ function InventoryManagement() {
         unitsAvailable
       });
       showToast(`Inventory updated: ${bloodGroup} is set to ${unitsAvailable} units.`, 'success');
-      fetchInventory();
+      fetchInventory(); // Refresh local cache
     } catch (err) {
       showToast('Error updating inventory: ' + err.message, 'error');
     } finally {
@@ -44,7 +34,7 @@ function InventoryManagement() {
     }
   };
 
-  if (loading) {
+  if (loadingInventory && inventory.length === 0) {
     return <div className="container"><p style={{ textAlign: 'center' }}>Loading inventory database...</p></div>;
   }
 

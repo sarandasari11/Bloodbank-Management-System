@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNotification } from '../components/NotificationProvider';
+import { useData } from '../components/DataContext';
 
 function DonorManagement() {
   const { showToast, confirm } = useNotification();
-  const [donors, setDonors] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { donors, fetchDonors, loadingDonors } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBloodGroup, setSelectedBloodGroup] = useState('All');
 
@@ -18,19 +18,9 @@ function DonorManagement() {
   const [address, setAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchDonors = async () => {
-    try {
-      const res = await axios.get('/api/donors');
-      setDonors(res.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching donors:', err);
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchDonors();
+    fetchDonors(); // Background refresh
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAddDonor = async (e) => {
@@ -53,7 +43,7 @@ function DonorManagement() {
       setBloodGroup('A+');
       setPhone('');
       setAddress('');
-      fetchDonors();
+      fetchDonors(); // Refresh cache
     } catch (err) {
       showToast('Error registering donor: ' + err.message, 'error');
     } finally {
@@ -68,7 +58,7 @@ function DonorManagement() {
         try {
           await axios.delete(`/api/donors/${id}`);
           showToast(`Donor "${donorName}" record has been deleted.`, 'success');
-          fetchDonors();
+          fetchDonors(); // Refresh cache
         } catch (err) {
           showToast('Error deleting donor: ' + err.message, 'error');
         }
@@ -90,7 +80,7 @@ function DonorManagement() {
     return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  if (loading) {
+  if (loadingDonors && donors.length === 0) {
     return <div className="container"><p style={{ textAlign: 'center' }}>Loading donors directory...</p></div>;
   }
 

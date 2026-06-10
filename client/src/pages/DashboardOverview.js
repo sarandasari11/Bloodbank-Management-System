@@ -1,34 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useNotification } from '../components/NotificationProvider';
+import { useData } from '../components/DataContext';
 
 function DashboardOverview() {
   const { showToast, confirm } = useNotification();
-  const [stats, setStats] = useState({
-    totalDonors: 0,
-    totalDonations: 0,
-    totalHospitals: 0,
-    pendingRequests: 0,
-    lowStockAlertsCount: 0,
-    lowStockAlerts: []
-  });
-  const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
-
-  const fetchStats = async () => {
-    try {
-      const res = await axios.get('/api/stats');
-      setStats(res.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching statistics:', err);
-      setLoading(false);
-    }
-  };
+  const { stats, fetchStats, refreshAll, loadingStats } = useData();
+  const [seeding, setSeeding] = React.useState(false);
 
   useEffect(() => {
-    fetchStats();
+    fetchStats(); // Background refresh
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSeed = () => {
@@ -39,7 +22,7 @@ function DashboardOverview() {
         try {
           const res = await axios.post('/api/seed');
           showToast(res.data.message || 'Database seeded successfully!', 'success');
-          fetchStats();
+          refreshAll(); // Reload everything in cache
         } catch (err) {
           showToast('Seeding failed: ' + err.message, 'error');
         } finally {
@@ -50,7 +33,8 @@ function DashboardOverview() {
     );
   };
 
-  if (loading) {
+  // Only show full loading on the very first mount if cache is empty
+  if (loadingStats && !stats.totalDonors && !stats.totalDonations && !stats.totalHospitals) {
     return <div className="container"><p style={{ textAlign: 'center' }}>Loading dashboard analytics...</p></div>;
   }
 
@@ -240,7 +224,7 @@ function DashboardOverview() {
       {/* ⚙️ Operations Quick Links */}
       <div className="card">
         <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '8px' }}>
-          Blood Bank Operations Quick Links
+          DBMS Operations Quick Links
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
           <Link to="/inventory" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>

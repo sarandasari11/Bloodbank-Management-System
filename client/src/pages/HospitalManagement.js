@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNotification } from '../components/NotificationProvider';
+import { useData } from '../components/DataContext';
 
 function HospitalManagement() {
   const { showToast, confirm } = useNotification();
-  const [hospitals, setHospitals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { hospitals, fetchHospitals, loadingHospitals, fetchStats } = useData();
 
   // Form state
   const [hospitalName, setHospitalName] = useState('');
@@ -14,19 +14,9 @@ function HospitalManagement() {
   const [address, setAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchHospitals = async () => {
-    try {
-      const res = await axios.get('/api/hospitals');
-      setHospitals(res.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching hospitals:', err);
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchHospitals();
+    fetchHospitals(); // Background refresh
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAddHospital = async (e) => {
@@ -44,7 +34,8 @@ function HospitalManagement() {
       setContactPerson('');
       setPhone('');
       setAddress('');
-      fetchHospitals();
+      fetchHospitals(); // Refresh cache
+      fetchStats();
     } catch (err) {
       showToast('Error registering hospital: ' + err.message, 'error');
     } finally {
@@ -59,7 +50,8 @@ function HospitalManagement() {
         try {
           await axios.delete(`/api/hospitals/${id}`);
           showToast(`Hospital "${name}" record deleted successfully.`, 'success');
-          fetchHospitals();
+          fetchHospitals(); // Refresh cache
+          fetchStats();
         } catch (err) {
           showToast('Error deleting hospital: ' + err.message, 'error');
         }
@@ -68,7 +60,7 @@ function HospitalManagement() {
     );
   };
 
-  if (loading) {
+  if (loadingHospitals && hospitals.length === 0) {
     return <div className="container"><p style={{ textAlign: 'center' }}>Loading hospitals directory...</p></div>;
   }
 
