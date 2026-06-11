@@ -85,7 +85,7 @@ function InventoryManagement() {
             return (
               <div key={item._id} className="blood-bag-container">
                 <div className="blood-bag-hanger" />
-                <div className="blood-bag" style={{ width: '100px', height: '146px' }}>
+                <div className={`blood-bag ${isLow ? 'shortage' : ''}`} style={{ width: '100px', height: '146px' }}>
                   <div className="blood-type-label">{item.bloodGroup}</div>
                   <div 
                     className="blood-liquid" 
@@ -96,13 +96,15 @@ function InventoryManagement() {
                 </div>
                 <div className="blood-bag-volume">{item.unitsAvailable} Units</div>
                 <div 
-                  className="blood-bag-status" 
+                  className={`blood-bag-status ${isLow ? 'badge-stock-low' : ''}`} 
                   style={{ 
                     color: isLow ? 'var(--danger-color)' : 'var(--success-color)',
                     fontWeight: '700',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    gap: '4px',
+                    padding: isLow ? '2px 8px' : '0',
+                    borderRadius: '50px'
                   }}
                 >
                   {isLow ? '⚠️ Shortage' : '✅ Safe'}
