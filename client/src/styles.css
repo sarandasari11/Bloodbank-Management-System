@@ -9,23 +9,33 @@
   --primary-color: #d90429;
   --primary-hover: #ef233c;
   --secondary-color: #2b2d42;
-  --bg-color: #f8f9fa;
-  --card-bg: #ffffff;
-  --text-dark: #2b2d42;
-  --text-light: #8d99ae;
-  --border-color: #edf2f7;
   
   --success-color: #2ec4b6;
   --warning-color: #ff9f1c;
   --danger-color: #e71d36;
   
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 16px 24px rgba(0, 0, 0, 0.08);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 18px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Light Theme Variables */
+  --bg-color: #f5f7fa;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --text-dark: #2b2d42;
+  --text-light: #8d99ae;
+  --border-color: rgba(226, 232, 240, 0.7);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+}
+
+[data-theme="dark"] {
+  /* Dark Theme Variables */
+  --bg-color: #0b0c10;
+  --card-bg: rgba(22, 26, 39, 0.7);
+  --text-dark: #f8f9fa;
+  --text-light: #a0aec0;
+  --border-color: rgba(74, 85, 104, 0.35);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
 }
 
 * {
@@ -49,7 +59,7 @@ body {
 /* Navbar Styling */
 nav {
   background: var(--card-bg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
@@ -58,7 +68,8 @@ nav {
   position: sticky;
   top: 0;
   z-index: 1000;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .nav-brand {
@@ -196,9 +207,11 @@ footer {
 
 .stats-card {
   background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: var(--radius-md);
   padding: 24px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow);
   border: 1px solid var(--border-color);
   transition: var(--transition);
   display: flex;
@@ -256,9 +269,11 @@ footer {
 
 .card {
   background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: var(--radius-md);
   padding: 24px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow);
   border: 1px solid var(--border-color);
 }
 
@@ -818,5 +833,105 @@ input:focus, select:focus, textarea:focus {
   color: var(--text-light);
   line-height: 1.4;
 }
+
+/* ==========================================
+   🌓 Theme Toggle Button & Animation Styles
+========================================== */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dark);
+  padding: 8px;
+  border-radius: 50%;
+  transition: var(--transition);
+  margin-left: 15px;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(43, 45, 66, 0.08);
+  transform: rotate(20deg);
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Pulsating alert animations */
+.badge-stock-low, .stats-card.warning::before {
+  animation: pulse-danger 2s infinite alternate;
+}
+
+@keyframes pulse-danger {
+  0% {
+    box-shadow: 0 0 0 0 rgba(231, 29, 54, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 8px rgba(231, 29, 54, 0);
+  }
+}
+
+/* ==========================================
+   📜 DBMS Transaction Activity Log Styles
+========================================== */
+.activity-log-container {
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.activity-log-item {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(43, 45, 66, 0.03);
+  border-left: 4px solid var(--secondary-color);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: var(--transition);
+}
+
+[data-theme="dark"] .activity-log-item {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.activity-log-item:hover {
+  transform: translateX(4px);
+  background: rgba(43, 45, 66, 0.05);
+}
+
+[data-theme="dark"] .activity-log-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.activity-log-item.success { border-left-color: var(--success-color); }
+.activity-log-item.warning { border-left-color: var(--warning-color); }
+.activity-log-item.danger { border-left-color: var(--danger-color); }
+
+.activity-log-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.activity-log-desc {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.activity-log-time {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  align-self: flex-end;
+}
+
 
 

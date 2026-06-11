@@ -15,20 +15,50 @@ function DashboardOverview() {
     lowStockAlerts: []
   });
   const [inventory, setInventory] = useState([]);
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
 
   const fetchStats = async () => {
     try {
-      const [statsRes, invRes] = await Promise.all([
+      const [statsRes, invRes, donationsRes, requestsRes] = await Promise.all([
         axios.get('http://localhost:5000/api/stats'),
-        axios.get('http://localhost:5000/api/inventory')
+        axios.get('http://localhost:5000/api/inventory'),
+        axios.get('http://localhost:5000/api/donations'),
+        axios.get('http://localhost:5000/api/requests')
       ]);
       setStats(statsRes.data);
       setInventory(invRes.data);
+
+      // Map donations to transaction log format
+      const donationLogs = donationsRes.data.map(d => ({
+        id: d._id,
+        type: 'donation',
+        title: `Donation: +${d.unitsDonated} units of ${d.bloodGroup}`,
+        description: `Received from ${d.donorId?.name || 'Unknown Donor'}`,
+        timestamp: new Date(d.donationDate),
+        statusClass: 'success'
+      }));
+
+      // Map requests to transaction log format
+      const requestLogs = requestsRes.data.map(r => ({
+        id: r._id,
+        type: 'request',
+        title: `Request: ${r.status} ${r.unitsRequired} units of ${r.bloodGroup}`,
+        description: `Submitted by ${r.hospitalId?.hospitalName || 'Unknown Hospital'}`,
+        timestamp: new Date(r.requestDate),
+        statusClass: r.status === 'Approved' ? 'success' : r.status === 'Rejected' ? 'danger' : 'warning'
+      }));
+
+      // Sort combined activity log chronologically (most recent first)
+      const combinedLogs = [...donationLogs, ...requestLogs]
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, 10);
+
+      setLogs(combinedLogs);
       setLoading(false);
     } catch (err) {
-      console.error('Error fetching statistics:', err);
+      console.error('Error fetching dashboard statistics:', err);
       setLoading(false);
     }
   };
@@ -279,24 +309,51 @@ function DashboardOverview() {
         </div>
       </div>
 
-      {/* ⚙️ Operations Quick Links */}
-      <div className="card">
-        <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '8px' }}>
-          Blood Bank Operations Quick Links
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-          <Link to="/inventory" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
-            📊 View Inventory Stock
-          </Link>
-          <Link to="/donors" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
-            🧑 Add / Manage Donors
-          </Link>
-          <Link to="/donations" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
-            💉 Record New Donation
-          </Link>
-          <Link to="/requests" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
-            📋 Approve Hospital Requests
-          </Link>
+      {/* Split Layout for Activity Log & Quick Links */}
+      <div className="split-layout" style={{ marginTop: '20px' }}>
+        {/* 📜 DBMS Transaction Activity Log */}
+        <div className="card">
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '8px' }}>
+            📜 System Activity & Audit Log
+          </h2>
+          <div className="activity-log-container">
+            {logs.length === 0 ? (
+              <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', textAlign: 'center', margin: '20px 0' }}>
+                No database transactions logged yet.
+              </p>
+            ) : (
+              logs.map((log) => (
+                <div key={log.id} className={`activity-log-item ${log.statusClass}`}>
+                  <div className="activity-log-title">{log.title}</div>
+                  <div className="activity-log-desc">{log.description}</div>
+                  <div className="activity-log-time">
+                    {log.timestamp.toLocaleDateString()} at {log.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* ⚙️ Operations Quick Links */}
+        <div className="card" style={{ height: 'fit-content' }}>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '8px' }}>
+            Operations Quick Links
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '15px' }}>
+            <Link to="/inventory" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+              📊 View Inventory Stock
+            </Link>
+            <Link to="/donors" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+              🧑 Add / Manage Donors
+            </Link>
+            <Link to="/donations" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+              💉 Record New Donation
+            </Link>
+            <Link to="/requests" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+              📋 Approve Hospital Requests
+            </Link>
+          </div>
         </div>
       </div>
     </div>

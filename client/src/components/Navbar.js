@@ -5,6 +5,7 @@ function Navbar() {
   const location = useLocation();
   const navLinksRef = useRef(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ opacity: 0, width: 0, transform: 'translateX(0px)' });
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   const updateIndicator = () => {
     const container = navLinksRef.current;
@@ -37,6 +38,19 @@ function Navbar() {
     };
   }, [location.pathname]);
 
+  // Apply theme change
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    // Smooth indicator update after theme classes modify widths/spacings
+    setTimeout(updateIndicator, 50);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
   return (
     <nav>
       <NavLink to="/" className="nav-brand">
@@ -62,6 +76,15 @@ function Navbar() {
         <NavLink to="/requests" className={({ isActive }) => isActive ? 'active' : ''}>
           Requests
         </NavLink>
+        
+        <button 
+          className="theme-toggle-btn" 
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+          aria-label="Toggle Theme"
+        >
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
       </div>
     </nav>
   );
