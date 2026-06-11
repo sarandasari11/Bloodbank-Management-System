@@ -168,7 +168,8 @@ function DashboardOverview() {
                   background: 'var(--card-bg)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '8px',
-                  boxShadow: 'var(--shadow-md)'
+                  boxShadow: 'var(--shadow-md)',
+                  color: 'var(--text-dark)'
                 }}
               />
               <Bar dataKey="unitsAvailable" radius={[6, 6, 0, 0]} maxBarSize={45}>
