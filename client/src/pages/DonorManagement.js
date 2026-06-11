@@ -8,6 +8,7 @@ function DonorManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBloodGroup, setSelectedBloodGroup] = useState('All');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Add Donor form state
   const [name, setName] = useState('');
@@ -46,13 +47,14 @@ function DonorManagement() {
         address
       });
       showToast('Donor registered successfully!', 'success');
-      // Reset form
+      // Reset form & close modal
       setName('');
       setAge('');
       setGender('Male');
       setBloodGroup('A+');
       setPhone('');
       setAddress('');
+      setShowAddModal(false);
       fetchDonors();
     } catch (err) {
       showToast('Error registering donor: ' + err.message, 'error');
@@ -96,178 +98,194 @@ function DonorManagement() {
 
   return (
     <div className="container">
-      <div>
-        <h1 className="page-title">Donor Management</h1>
-        <p className="page-subtitle">Register new donors and manage the donor database</p>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Donor Management</h1>
+          <p className="page-subtitle">Register new donors and manage the donor database</p>
+        </div>
+        <button 
+          className="btn btn-primary" 
+          onClick={() => setShowAddModal(true)}
+        >
+          ➕ Register New Donor
+        </button>
       </div>
 
-      <div className="split-layout">
-        <div className="card">
-          <h2 className="form-title">Donor Registry</h2>
-          
-          <div className="filter-bar">
-            <input 
-              type="text" 
-              placeholder="🔍 Search donor by name..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <select 
-              value={selectedBloodGroup} 
-              onChange={(e) => setSelectedBloodGroup(e.target.value)}
-              style={{ width: '150px' }}
-            >
-              <option value="All">All Blood Groups</option>
-              <option value="A+">A+</option>
-              <option value="A-">A-</option>
-              <option value="B+">B+</option>
-              <option value="B-">B-</option>
-              <option value="AB+">AB+</option>
-              <option value="AB-">AB-</option>
-              <option value="O+">O+</option>
-              <option value="O-">O-</option>
-            </select>
-          </div>
+      <div className="card" style={{ width: '100%' }}>
+        <h2 className="form-title">Donor Registry</h2>
+        
+        <div className="filter-bar">
+          <input 
+            type="text" 
+            placeholder="🔍 Search donor by name..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <select 
+            value={selectedBloodGroup} 
+            onChange={(e) => setSelectedBloodGroup(e.target.value)}
+            style={{ width: '200px' }}
+          >
+            <option value="All">All Blood Groups</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+        </div>
 
-          <div className="table-responsive">
-            <table className="data-table donor-table">
-              <thead>
+        <div className="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Age/Gender</th>
+                <th>Blood Group</th>
+                <th>Contact Info</th>
+                <th>Last Donation</th>
+                <th style={{ width: '120px' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredDonors.length === 0 ? (
                 <tr>
-                  <th>Name</th>
-                  <th>Age/Gender</th>
-                  <th>Blood Group</th>
-                  <th>Contact Info</th>
-                  <th>Last Donation</th>
-                  <th>Actions</th>
+                  <td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-light)' }}>
+                    No donors found matching the filters.
+                  </td>
                 </tr>
-              </thead>
-              <colgroup>
-                <col style={{ width: '18%' }} />
-                <col style={{ width: '12%' }} />
-                <col style={{ width: '12%' }} />
-                <col style={{ width: '30%' }} />
-                <col style={{ width: '16%' }} />
-                <col style={{ width: '12%' }} />
-              </colgroup>
-              <tbody>
-                {filteredDonors.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-light)' }}>
-                      No donors found matching the filters.
+              ) : (
+                filteredDonors.map((donor) => (
+                  <tr key={donor._id}>
+                    <td>
+                      <strong>{donor.name}</strong>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>ID: {donor._id.slice(-6).toUpperCase()}</div>
+                    </td>
+                    <td>{donor.age} yrs / {donor.gender}</td>
+                    <td>
+                      <span className="badge badge-stock-normal" style={{ background: '#ffe3e6', color: 'var(--primary-color)' }}>
+                        {donor.bloodGroup}
+                      </span>
+                    </td>
+                    <td>
+                      <div>📞 {donor.phone}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>📍 {donor.address}</div>
+                    </td>
+                    <td>{formatDate(donor.lastDonation)}</td>
+                    <td>
+                      <button 
+                        onClick={() => handleDeleteDonor(donor._id, donor.name)} 
+                        className="btn btn-danger"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  filteredDonors.map((donor) => (
-                    <tr key={donor._id}>
-                      <td>
-                        <strong>{donor.name}</strong>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>ID: {donor._id.slice(-6).toUpperCase()}</div>
-                      </td>
-                      <td>{donor.age} yrs / {donor.gender}</td>
-                      <td>
-                        <span className="badge badge-stock-normal" style={{ background: '#ffe3e6', color: 'var(--primary-color)' }}>
-                          {donor.bloodGroup}
-                        </span>
-                      </td>
-                      <td className="contact-cell">
-                        <div>📞 {donor.phone}</div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>📍 {donor.address}</div>
-                      </td>
-                      <td>{formatDate(donor.lastDonation)}</td>
-                      <td>
-                        <button 
-                          onClick={() => handleDeleteDonor(donor._id, donor.name)} 
-                          className="btn btn-danger"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="card" style={{ height: 'fit-content' }}>
-          <h2 className="form-title">Register New Donor</h2>
-          <form onSubmit={handleAddDonor} style={{ width: '100%', padding: 0, boxShadow: 'none' }}>
-            <div className="form-group">
-              <label>Full Name</label>
-              <input 
-                type="text" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                required 
-                placeholder="e.g. John Doe"
-              />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <div className="form-group">
-                <label>Age</label>
-                <input 
-                  type="number" 
-                  min="1" 
-                  value={age} 
-                  onChange={(e) => setAge(e.target.value)} 
-                  required 
-                  placeholder="e.g. 25"
-                />
-              </div>
-              <div className="form-group">
-                <label>Gender</label>
-                <select value={gender} onChange={(e) => setGender(e.target.value)}>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Blood Group</label>
-              <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)}>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Phone Number</label>
-              <input 
-                type="text" 
-                value={phone} 
-                onChange={(e) => setPhone(e.target.value)} 
-                required 
-                placeholder="e.g. 555-0199"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Address</label>
-              <textarea 
-                value={address} 
-                onChange={(e) => setAddress(e.target.value)} 
-                required 
-                placeholder="e.g. 123 Main St"
-                rows="2"
-              />
-            </div>
-
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '10px' }} disabled={submitting}>
-              {submitting ? 'Registering...' : 'Register Donor'}
-            </button>
-          </form>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
+
+      {/* ➕ Register Donor Modal Form */}
+      {showAddModal && (
+        <div className="modal-backdrop">
+          <div className="modal-card modal-form-card">
+            <h2 className="form-title">Register New Donor</h2>
+            <form onSubmit={handleAddDonor} style={{ width: '100%', padding: 0, boxShadow: 'none', background: 'transparent' }}>
+              <div className="form-group">
+                <label>Full Name</label>
+                <input 
+                  type="text" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  required 
+                  placeholder="e.g. John Doe"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="form-group">
+                  <label>Age</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    value={age} 
+                    onChange={(e) => setAge(e.target.value)} 
+                    required 
+                    placeholder="e.g. 25"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Gender</label>
+                  <select value={gender} onChange={(e) => setGender(e.target.value)}>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Blood Group</label>
+                <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)}>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Phone Number</label>
+                <input 
+                  type="text" 
+                  value={phone} 
+                  onChange={(e) => setPhone(e.target.value)} 
+                  required 
+                  placeholder="e.g. 555-0199"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Address</label>
+                <textarea 
+                  value={address} 
+                  onChange={(e) => setAddress(e.target.value)} 
+                  required 
+                  placeholder="e.g. 123 Main St"
+                  rows="2"
+                />
+              </div>
+
+              <div className="modal-actions" style={{ marginTop: '20px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  disabled={submitting}
+                >
+                  {submitting ? 'Registering...' : 'Register Donor'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

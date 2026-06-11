@@ -933,5 +933,136 @@ input:focus, select:focus, textarea:focus {
   align-self: flex-end;
 }
 
+/* ==========================================
+   🩸 Visual Rack - Hanging Blood Bags
+========================================== */
+.blood-rack {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 30px;
+  justify-items: center;
+  padding: 30px 10px;
+  background: rgba(43, 45, 66, 0.02);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-color);
+  margin-top: 20px;
+}
+
+[data-theme="dark"] .blood-rack {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.blood-bag-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 110px;
+  transition: var(--transition);
+}
+
+.blood-bag-container:hover {
+  transform: translateY(-8px);
+}
+
+/* Hanging line */
+.blood-bag-hanger {
+  width: 2px;
+  height: 20px;
+  background: var(--text-light);
+  position: relative;
+}
+
+.blood-bag-hanger::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-light);
+}
+
+.blood-bag {
+  width: 96px;
+  height: 140px;
+  border: 3px solid var(--text-light);
+  border-radius: 20px 20px 35px 35px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: var(--glass-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.blood-liquid {
+  width: 100%;
+  background: linear-gradient(to top, #800f2f, #d90429);
+  transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+/* Wave overlay at the top of blood liquid */
+.blood-wave {
+  position: absolute;
+  top: -6px;
+  left: 0;
+  width: 200%;
+  height: 10px;
+  background: var(--card-bg);
+  border-radius: 50%;
+  animation: waveMotion 4s linear infinite;
+  opacity: 0.95;
+}
+
+@keyframes waveMotion {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-25%); }
+  100% { transform: translateX(-50%); }
+}
+
+.blood-type-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 800;
+  z-index: 10;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  color: #fff;
+}
+
+.blood-bag-volume {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 10px;
+  color: var(--text-dark);
+}
+
+.blood-bag-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Floating Action Button (FAB) */
+.fab-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 5px;
+}
+
+/* Modal Form styling adjustments */
+.modal-form-card {
+  max-width: 550px !important;
+  width: 95% !important;
+}
+
+
 
 
