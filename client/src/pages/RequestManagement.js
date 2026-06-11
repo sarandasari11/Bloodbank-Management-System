@@ -355,7 +355,7 @@ function RequestManagement() {
                 filteredRequests.map((r) => (
                   <tr key={r._id}>
                     <td>
-                      <code style={{ background: 'rgba(43, 45, 66, 0.05)', padding: '4px 6px', borderRadius: '4px' }}>
+                      <code style={{ background: 'rgba(46, 196, 182, 0.12)', padding: '4px 6px', borderRadius: '4px', color: '#2ec4b6', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                         REQ-{r._id.slice(-6).toUpperCase()}
                       </code>
                     </td>

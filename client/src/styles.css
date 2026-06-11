@@ -30,7 +30,7 @@
   --input-bg: #ffffff;
   --input-text: #2b2d42;
   --input-border: #ced4da;
-  --table-header-bg: #f1f3f5;
+  --table-header-bg: #ff9f1c;
   --table-hover-bg: #fafbfc;
   --nav-links-bg: rgba(248, 249, 250, 0.8);
   --tab-container-bg: rgba(43, 45, 66, 0.05);
@@ -53,7 +53,7 @@
   --input-bg: #1a1d29;
   --input-text: #f8f9fa;
   --input-border: rgba(74, 85, 104, 0.6);
-  --table-header-bg: rgba(43, 45, 66, 0.6);
+  --table-header-bg: #ff9f1c;
   --table-hover-bg: rgba(255, 255, 255, 0.03);
   --nav-links-bg: rgba(22, 26, 39, 0.6);
   --tab-container-bg: rgba(22, 26, 39, 0.6);
@@ -307,6 +307,8 @@ footer {
   width: 100%;
   overflow-x: auto;
   margin-top: 15px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
 }
 
 table {
