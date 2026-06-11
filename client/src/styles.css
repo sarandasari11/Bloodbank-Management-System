@@ -1089,7 +1089,16 @@ input:focus, select:focus, textarea:focus {
   pointer-events: none;
   mix-blend-mode: difference;
   color: #fff;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  transition: var(--transition);
 }
+
+.blood-bag-container:hover .blood-type-label {
+  color: var(--warning-color) !important;
+  mix-blend-mode: normal !important;
+  text-shadow: none !important;
+}
+
 
 .blood-bag-volume {
   font-size: 0.85rem;
