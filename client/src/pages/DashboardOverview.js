@@ -169,11 +169,12 @@ function DashboardOverview() {
                   background: 'var(--card-bg)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '8px',
-                  boxShadow: 'var(--shadow-md)',
-                  color: 'var(--text-dark)'
+                  boxShadow: 'var(--shadow-md)'
                 }}
+                labelStyle={{ color: 'var(--text-dark)', fontWeight: 600 }}
+                itemStyle={{ color: 'var(--text-dark)' }}
               />
-              <Bar dataKey="unitsAvailable" radius={[6, 6, 0, 0]} maxBarSize={45}>
+              <Bar name="Units Available" dataKey="unitsAvailable" radius={[6, 6, 0, 0]} maxBarSize={45}>
                 {inventory.map((entry, index) => {
                   const isLow = entry.unitsAvailable < 6;
                   return (
