@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNotification } from '../components/NotificationProvider';
-import { useData } from '../components/DataContext';
 
 function HospitalManagement() {
   const { showToast, confirm } = useNotification();
-  const { hospitals, fetchHospitals, loadingHospitals, fetchStats } = useData();
+  const [hospitals, setHospitals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Form state
   const [hospitalName, setHospitalName] = useState('');
@@ -14,16 +14,26 @@ function HospitalManagement() {
   const [address, setAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const fetchHospitals = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/hospitals');
+      setHospitals(res.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching hospitals:', err);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchHospitals(); // Background refresh
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchHospitals();
   }, []);
 
   const handleAddHospital = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.post('/api/hospitals', {
+      await axios.post('http://localhost:5000/api/hospitals', {
         hospitalName,
         contactPerson,
         phone,
@@ -34,8 +44,7 @@ function HospitalManagement() {
       setContactPerson('');
       setPhone('');
       setAddress('');
-      fetchHospitals(); // Refresh cache
-      fetchStats();
+      fetchHospitals();
     } catch (err) {
       showToast('Error registering hospital: ' + err.message, 'error');
     } finally {
@@ -48,10 +57,9 @@ function HospitalManagement() {
       `Are you sure you want to permanently delete hospital "${name}"?`,
       async () => {
         try {
-          await axios.delete(`/api/hospitals/${id}`);
+          await axios.delete(`http://localhost:5000/api/hospitals/${id}`);
           showToast(`Hospital "${name}" record deleted successfully.`, 'success');
-          fetchHospitals(); // Refresh cache
-          fetchStats();
+          fetchHospitals();
         } catch (err) {
           showToast('Error deleting hospital: ' + err.message, 'error');
         }
@@ -60,7 +68,7 @@ function HospitalManagement() {
     );
   };
 
-  if (loadingHospitals && hospitals.length === 0) {
+  if (loading) {
     return <div className="container"><p style={{ textAlign: 'center' }}>Loading hospitals directory...</p></div>;
   }
 
@@ -75,7 +83,7 @@ function HospitalManagement() {
         <div className="card">
           <h2 className="form-title">Hospital Directory</h2>
           <div className="table-responsive">
-            <table>
+            <table className="data-table hospital-table">
               <thead>
                 <tr>
                   <th>Hospital Name</th>
@@ -85,6 +93,13 @@ function HospitalManagement() {
                   <th>Actions</th>
                 </tr>
               </thead>
+              <colgroup>
+                <col style={{ width: '24%' }} />
+                <col style={{ width: '22%' }} />
+                <col style={{ width: '18%' }} />
+                <col style={{ width: '24%' }} />
+                <col style={{ width: '12%' }} />
+              </colgroup>
               <tbody>
                 {hospitals.length === 0 ? (
                   <tr>
@@ -100,7 +115,7 @@ function HospitalManagement() {
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>ID: {hospital._id.slice(-6).toUpperCase()}</div>
                       </td>
                       <td>{hospital.contactPerson}</td>
-                      <td>📞 {hospital.phone}</td>
+                      <td className="contact-cell">📞 {hospital.phone}</td>
                       <td>📍 {hospital.address}</td>
                       <td>
                         <button 

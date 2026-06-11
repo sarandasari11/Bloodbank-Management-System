@@ -1,17 +1,40 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useNotification } from '../components/NotificationProvider';
-import { useData } from '../components/DataContext';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 function DashboardOverview() {
   const { showToast, confirm } = useNotification();
-  const { stats, fetchStats, refreshAll, loadingStats } = useData();
-  const [seeding, setSeeding] = React.useState(false);
+  const [stats, setStats] = useState({
+    totalDonors: 0,
+    totalDonations: 0,
+    totalHospitals: 0,
+    pendingRequests: 0,
+    lowStockAlertsCount: 0,
+    lowStockAlerts: []
+  });
+  const [inventory, setInventory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
+
+  const fetchStats = async () => {
+    try {
+      const [statsRes, invRes] = await Promise.all([
+        axios.get('http://localhost:5000/api/stats'),
+        axios.get('http://localhost:5000/api/inventory')
+      ]);
+      setStats(statsRes.data);
+      setInventory(invRes.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching statistics:', err);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetchStats(); // Background refresh
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchStats();
   }, []);
 
   const handleSeed = () => {
@@ -20,9 +43,9 @@ function DashboardOverview() {
       async () => {
         setSeeding(true);
         try {
-          const res = await axios.post('/api/seed');
+          const res = await axios.post('http://localhost:5000/api/seed');
           showToast(res.data.message || 'Database seeded successfully!', 'success');
-          refreshAll(); // Reload everything in cache
+          fetchStats();
         } catch (err) {
           showToast('Seeding failed: ' + err.message, 'error');
         } finally {
@@ -33,8 +56,7 @@ function DashboardOverview() {
     );
   };
 
-  // Only show full loading on the very first mount if cache is empty
-  if (loadingStats && !stats.totalDonors && !stats.totalDonations && !stats.totalHospitals) {
+  if (loading) {
     return <div className="container"><p style={{ textAlign: 'center' }}>Loading dashboard analytics...</p></div>;
   }
 
@@ -96,6 +118,42 @@ function DashboardOverview() {
           <span className="stats-title">Pending Requests</span>
           <span className="stats-value">{stats.pendingRequests}</span>
           <span className="stats-desc">Requests awaiting approval</span>
+        </div>
+      </div>
+
+      {/* 📊 Live Blood Stock Bar Chart Analysis */}
+      <div className="card">
+        <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '8px' }}>
+          📊 Live Blood Stock Inventory Analysis
+        </h2>
+        <div style={{ width: '100%', height: 280, marginTop: '20px' }}>
+          <ResponsiveContainer>
+            <BarChart data={inventory} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+              <XAxis dataKey="bloodGroup" tick={{ fill: 'var(--text-dark)', fontSize: 12, fontWeight: 600 }} />
+              <YAxis tick={{ fill: 'var(--text-light)', fontSize: 11 }} />
+              <Tooltip 
+                cursor={{ fill: 'rgba(217, 4, 41, 0.04)' }} 
+                contentStyle={{
+                  background: 'var(--card-bg)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  boxShadow: 'var(--shadow-md)'
+                }}
+              />
+              <Bar dataKey="unitsAvailable" radius={[6, 6, 0, 0]} maxBarSize={45}>
+                {inventory.map((entry, index) => {
+                  const isLow = entry.unitsAvailable < 6;
+                  return (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={isLow ? 'var(--danger-color)' : 'var(--primary-color)'} 
+                    />
+                  );
+                })}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
@@ -224,7 +282,7 @@ function DashboardOverview() {
       {/* ⚙️ Operations Quick Links */}
       <div className="card">
         <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '8px' }}>
-          DBMS Operations Quick Links
+          Blood Bank Operations Quick Links
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
           <Link to="/inventory" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>

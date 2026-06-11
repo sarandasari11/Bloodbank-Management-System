@@ -1,13 +1,49 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 
 function Navbar() {
+  const location = useLocation();
+  const navLinksRef = useRef(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ opacity: 0, width: 0, transform: 'translateX(0px)' });
+
+  const updateIndicator = () => {
+    const container = navLinksRef.current;
+    if (!container) return;
+
+    const activeLink = container.querySelector('a.active');
+    if (!activeLink) {
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+      return;
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+    const left = linkRect.left - containerRect.left + container.scrollLeft;
+
+    setIndicatorStyle({
+      opacity: 1,
+      width: linkRect.width,
+      transform: `translateX(${left}px)`
+    });
+  };
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(updateIndicator);
+    window.addEventListener('resize', updateIndicator);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('resize', updateIndicator);
+    };
+  }, [location.pathname]);
+
   return (
     <nav>
       <NavLink to="/" className="nav-brand">
         🩸 BloodBank <span>Management System</span>
       </NavLink>
-      <div className="nav-links">
+      <div className="nav-links" ref={navLinksRef}>
+        <span className="nav-indicator" style={indicatorStyle} aria-hidden="true" />
         <NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''}>
           Overview
         </NavLink>

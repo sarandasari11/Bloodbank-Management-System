@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNotification } from '../components/NotificationProvider';
-import { useData } from '../components/DataContext';
 
 function DonationManagement() {
   const { showToast } = useNotification();
-  const { 
-    donations, fetchDonations, loadingDonations,
-    donors, fetchDonors, loadingDonors,
-    fetchStats, fetchInventory 
-  } = useData();
+  const [donations, setDonations] = useState([]);
+  const [donors, setDonors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Form state
   const [selectedDonorId, setSelectedDonorId] = useState('');
@@ -17,18 +14,28 @@ function DonationManagement() {
   const [donationDate, setDonationDate] = useState(new Date().toISOString().split('T')[0]);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchDonations();
-    fetchDonors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Set default donor when donors load
-  useEffect(() => {
-    if (donors.length > 0 && !selectedDonorId) {
-      setSelectedDonorId(donors[0]._id);
+  const fetchData = useCallback(async () => {
+    try {
+      const [donationsRes, donorsRes] = await Promise.all([
+        axios.get('http://localhost:5000/api/donations'),
+        axios.get('http://localhost:5000/api/donors')
+      ]);
+      setDonations(donationsRes.data);
+      setDonors(donorsRes.data);
+      if (donorsRes.data.length > 0 && !selectedDonorId) {
+        setSelectedDonorId(donorsRes.data[0]._id);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching donations data:', err);
+      setLoading(false);
     }
-  }, [donors, selectedDonorId]);
+  }, [selectedDonorId]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleRecordDonation = async (e) => {
     e.preventDefault();
@@ -38,19 +45,14 @@ function DonationManagement() {
     }
     setSubmitting(true);
     try {
-      const res = await axios.post('/api/donations', {
+      const res = await axios.post('http://localhost:5000/api/donations', {
         donorId: selectedDonorId,
         unitsDonated: parseInt(unitsDonated),
         donationDate: new Date(donationDate)
       });
       showToast(res.data.message || 'Donation recorded and inventory updated!', 'success');
       setUnitsDonated(1);
-      
-      // Refresh cache
-      fetchDonations();
-      fetchDonors();
-      fetchStats();
-      fetchInventory();
+      fetchData();
     } catch (err) {
       showToast('Error recording donation: ' + (err.response?.data?.error || err.message), 'error');
     } finally {
@@ -69,7 +71,7 @@ function DonationManagement() {
     return d ? d.bloodGroup : '';
   };
 
-  if ((loadingDonations && donations.length === 0) || (loadingDonors && donors.length === 0)) {
+  if (loading) {
     return <div className="container"><p style={{ textAlign: 'center' }}>Loading donations logs...</p></div>;
   }
 

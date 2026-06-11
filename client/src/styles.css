@@ -78,10 +78,18 @@ nav {
 
 .nav-links {
   display: flex;
+  position: relative;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(248, 249, 250, 0.8);
 }
 
 .nav-links a {
+  position: relative;
+  z-index: 1;
   color: var(--text-dark);
   text-decoration: none;
   font-weight: 500;
@@ -97,9 +105,35 @@ nav {
 }
 
 .nav-links a.active {
-  background: #ffe3e6;
   color: var(--primary-color);
   font-weight: 600;
+}
+
+.nav-indicator {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  height: calc(100% - 8px);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(217, 4, 41, 0.14), rgba(239, 35, 60, 0.2));
+  box-shadow: 0 6px 16px rgba(217, 4, 41, 0.12);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), width 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s ease;
+  pointer-events: none;
+}
+
+.route-transition {
+  animation: pageSlideIn 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.main-content {
+  overflow: hidden;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--primary-color);
+  background: transparent;
 }
 
 /* App Containers */
@@ -239,6 +273,25 @@ table {
   border-collapse: collapse;
   text-align: left;
   font-size: 0.95rem;
+}
+
+.data-table {
+  table-layout: fixed;
+}
+
+.data-table th,
+.data-table td {
+  vertical-align: top;
+}
+
+.contact-cell {
+  word-break: break-word;
+  white-space: normal;
+}
+
+.donor-table td:nth-child(4),
+.hospital-table td:nth-child(3) {
+  min-width: 180px;
 }
 
 th {
@@ -492,6 +545,42 @@ input:focus, select:focus, textarea:focus {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition,
+  .nav-indicator,
+  .nav-links a,
+  .btn,
+  .stats-card,
+  .inventory-card {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  nav {
+    gap: 14px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 /* ==========================================

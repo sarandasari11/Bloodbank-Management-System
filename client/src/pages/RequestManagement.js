@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNotification } from '../components/NotificationProvider';
-import { useData } from '../components/DataContext';
 
 function RequestManagement() {
   const { showToast, confirm } = useNotification();
-  const { 
-    requests, fetchRequests, loadingRequests,
-    hospitals, fetchHospitals, loadingHospitals,
-    fetchStats, fetchInventory
-  } = useData();
+  const [requests, setRequests] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Form state
   const [selectedHospitalId, setSelectedHospitalId] = useState('');
@@ -18,18 +15,28 @@ function RequestManagement() {
   const [requestDate, setRequestDate] = useState(new Date().toISOString().split('T')[0]);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchRequests();
-    fetchHospitals();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Set default hospital when hospitals load
-  useEffect(() => {
-    if (hospitals.length > 0 && !selectedHospitalId) {
-      setSelectedHospitalId(hospitals[0]._id);
+  const fetchData = useCallback(async () => {
+    try {
+      const [requestsRes, hospitalsRes] = await Promise.all([
+        axios.get('http://localhost:5000/api/requests'),
+        axios.get('http://localhost:5000/api/hospitals')
+      ]);
+      setRequests(requestsRes.data);
+      setHospitals(hospitalsRes.data);
+      if (hospitalsRes.data.length > 0 && !selectedHospitalId) {
+        setSelectedHospitalId(hospitalsRes.data[0]._id);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching blood requests:', err);
+      setLoading(false);
     }
-  }, [hospitals, selectedHospitalId]);
+  }, [selectedHospitalId]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleCreateRequest = async (e) => {
     e.preventDefault();
@@ -39,7 +46,7 @@ function RequestManagement() {
     }
     setSubmitting(true);
     try {
-      await axios.post('/api/requests', {
+      await axios.post('http://localhost:5000/api/requests', {
         hospitalId: selectedHospitalId,
         bloodGroup,
         unitsRequired: parseInt(unitsRequired),
@@ -47,10 +54,7 @@ function RequestManagement() {
       });
       showToast('Blood request submitted successfully!', 'success');
       setUnitsRequired(1);
-      
-      // Refresh cache
-      fetchRequests();
-      fetchStats();
+      fetchData();
     } catch (err) {
       showToast('Error creating blood request: ' + err.message, 'error');
     } finally {
@@ -60,15 +64,11 @@ function RequestManagement() {
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
-      const res = await axios.put(`/api/requests/${id}`, {
+      const res = await axios.put(`http://localhost:5000/api/requests/${id}`, {
         status: newStatus
       });
       showToast(res.data.message || `Request status set to ${newStatus}.`, 'success');
-      
-      // Refresh cache
-      fetchRequests();
-      fetchStats();
-      fetchInventory();
+      fetchData();
     } catch (err) {
       showToast('Transaction Error: ' + (err.response?.data?.error || err.message), 'error');
     }
@@ -79,13 +79,9 @@ function RequestManagement() {
       'Are you sure you want to permanently delete this request record? Any approved units will be returned to inventory.',
       async () => {
         try {
-          await axios.delete(`/api/requests/${id}`);
+          await axios.delete(`http://localhost:5000/api/requests/${id}`);
           showToast('Request record deleted successfully.', 'success');
-          
-          // Refresh cache
-          fetchRequests();
-          fetchStats();
-          fetchInventory();
+          fetchData();
         } catch (err) {
           showToast('Error deleting request: ' + err.message, 'error');
         }
@@ -106,7 +102,7 @@ function RequestManagement() {
     return 'badge badge-pending';
   };
 
-  if ((loadingRequests && requests.length === 0) || (loadingHospitals && hospitals.length === 0)) {
+  if (loading) {
     return <div className="container"><p style={{ textAlign: 'center' }}>Loading blood requests queue...</p></div>;
   }
 

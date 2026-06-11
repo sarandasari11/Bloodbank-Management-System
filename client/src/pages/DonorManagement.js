@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNotification } from '../components/NotificationProvider';
-import { useData } from '../components/DataContext';
 
 function DonorManagement() {
   const { showToast, confirm } = useNotification();
-  const { donors, fetchDonors, loadingDonors } = useData();
+  const [donors, setDonors] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBloodGroup, setSelectedBloodGroup] = useState('All');
 
@@ -18,16 +18,26 @@ function DonorManagement() {
   const [address, setAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const fetchDonors = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/donors');
+      setDonors(res.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching donors:', err);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchDonors(); // Background refresh
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchDonors();
   }, []);
 
   const handleAddDonor = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.post('/api/donors', {
+      await axios.post('http://localhost:5000/api/donors', {
         name,
         age: parseInt(age),
         gender,
@@ -43,7 +53,7 @@ function DonorManagement() {
       setBloodGroup('A+');
       setPhone('');
       setAddress('');
-      fetchDonors(); // Refresh cache
+      fetchDonors();
     } catch (err) {
       showToast('Error registering donor: ' + err.message, 'error');
     } finally {
@@ -56,9 +66,9 @@ function DonorManagement() {
       `Are you sure you want to permanently delete donor "${donorName}"?`,
       async () => {
         try {
-          await axios.delete(`/api/donors/${id}`);
+          await axios.delete(`http://localhost:5000/api/donors/${id}`);
           showToast(`Donor "${donorName}" record has been deleted.`, 'success');
-          fetchDonors(); // Refresh cache
+          fetchDonors();
         } catch (err) {
           showToast('Error deleting donor: ' + err.message, 'error');
         }
@@ -80,7 +90,7 @@ function DonorManagement() {
     return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  if (loadingDonors && donors.length === 0) {
+  if (loading) {
     return <div className="container"><p style={{ textAlign: 'center' }}>Loading donors directory...</p></div>;
   }
 
@@ -120,7 +130,7 @@ function DonorManagement() {
           </div>
 
           <div className="table-responsive">
-            <table>
+            <table className="data-table donor-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -131,6 +141,14 @@ function DonorManagement() {
                   <th>Actions</th>
                 </tr>
               </thead>
+              <colgroup>
+                <col style={{ width: '18%' }} />
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '30%' }} />
+                <col style={{ width: '16%' }} />
+                <col style={{ width: '12%' }} />
+              </colgroup>
               <tbody>
                 {filteredDonors.length === 0 ? (
                   <tr>
@@ -151,7 +169,7 @@ function DonorManagement() {
                           {donor.bloodGroup}
                         </span>
                       </td>
-                      <td>
+                      <td className="contact-cell">
                         <div>📞 {donor.phone}</div>
                         <div style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>📍 {donor.address}</div>
                       </td>
