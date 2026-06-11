@@ -36,6 +36,9 @@
   --tab-container-bg: rgba(43, 45, 66, 0.05);
   --tab-pill-bg: #ffffff;
   --fact-text-color: #4a5568;
+
+  --btn-secondary-bg: #e9ecef;
+  --btn-secondary-text: #2b2d42;
 }
 
 [data-theme="dark"] {
@@ -56,6 +59,9 @@
   --tab-container-bg: rgba(22, 26, 39, 0.6);
   --tab-pill-bg: #2b2d42;
   --fact-text-color: #a0aec0;
+
+  --btn-secondary-bg: rgba(255, 255, 255, 0.15);
+  --btn-secondary-text: #f8f9fa;
 }
 
 * {
@@ -467,12 +473,12 @@ input:focus, select:focus, textarea:focus {
 }
 
 .btn-secondary {
-  background: #e9ecef;
-  color: var(--text-dark);
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
 }
 
 .btn-secondary:hover {
-  background: #dee2e6;
+  background: var(--border-color);
 }
 
 .btn-success {
@@ -495,6 +501,17 @@ input:focus, select:focus, textarea:focus {
 
 .btn-danger:hover {
   background: #c01528;
+}
+
+.btn-warning {
+  background: var(--warning-color);
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.btn-warning:hover {
+  background: #e68a00;
 }
 
 .btn-actions {

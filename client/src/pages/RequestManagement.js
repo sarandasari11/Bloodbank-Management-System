@@ -389,8 +389,7 @@ function RequestManagement() {
                             </button>
                             <button 
                               onClick={() => handleUpdateStatus(r._id, 'Rejected')} 
-                              className="btn btn-secondary"
-                              style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                              className="btn btn-warning"
                             >
                               Reject
                             </button>

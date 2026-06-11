@@ -99,7 +99,7 @@ function DashboardOverview() {
         </div>
         <button 
           onClick={handleSeed} 
-          className="btn btn-secondary"
+          className="btn btn-primary"
           disabled={seeding}
         >
           {seeding ? 'Seeding Database...' : '🔄 Reset & Seed Database'}
