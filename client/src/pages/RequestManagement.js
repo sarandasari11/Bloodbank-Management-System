@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useNotification } from '../components/NotificationProvider';
 
@@ -11,6 +11,9 @@ function RequestManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('All'); // 'All', 'Pending', 'Approved', 'Rejected'
+
+  const tabsRef = useRef(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ opacity: 0, width: 0, transform: 'translateX(0px)' });
 
   // Form state
   const [selectedHospitalId, setSelectedHospitalId] = useState('');
@@ -43,6 +46,38 @@ function RequestManagement() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Measure and position the sliding pill indicator
+  const updateIndicator = useCallback(() => {
+    const container = tabsRef.current;
+    if (!container) return;
+
+    const activeBtn = container.querySelector(`button[data-tab="${activeTab}"]`);
+    if (!activeBtn) {
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+      return;
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    const left = btnRect.left - containerRect.left + container.scrollLeft;
+
+    setIndicatorStyle({
+      opacity: 1,
+      width: btnRect.width,
+      transform: `translateX(${left}px)`
+    });
+  }, [activeTab]);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(updateIndicator);
+    window.addEventListener('resize', updateIndicator);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('resize', updateIndicator);
+    };
+  }, [updateIndicator, requests]);
 
   const handleCreateRequest = async (e) => {
     e.preventDefault();
@@ -232,23 +267,52 @@ function RequestManagement() {
 
         {/* Tab & Search Filters */}
         <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '15px', marginBottom: '20px' }}>
-          {/* Status Tabs */}
-          <div style={{ display: 'flex', gap: '4px', background: 'rgba(43, 45, 66, 0.05)', padding: '4px', borderRadius: 'var(--radius-sm)' }}>
+          {/* Sliding Pill Status Tabs */}
+          <div 
+            ref={tabsRef} 
+            style={{ 
+              position: 'relative', 
+              display: 'flex', 
+              gap: '4px', 
+              background: 'rgba(43, 45, 66, 0.05)', 
+              padding: '4px', 
+              borderRadius: '999px',
+              width: 'fit-content',
+              height: 'fit-content'
+            }}
+          >
+            {/* Sliding Pill Indicator */}
+            <div 
+              style={{
+                position: 'absolute',
+                top: '4px',
+                left: '0px',
+                height: 'calc(100% - 8px)',
+                borderRadius: '999px',
+                background: 'white',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                transition: 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), width 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s ease',
+                pointerEvents: 'none',
+                ...indicatorStyle
+              }}
+            />
             {['All', 'Pending', 'Approved', 'Rejected'].map(tab => (
               <button
                 key={tab}
+                data-tab={tab}
                 onClick={() => setActiveTab(tab)}
                 style={{
+                  position: 'relative',
+                  zIndex: 1,
                   border: 'none',
-                  background: activeTab === tab ? 'white' : 'transparent',
+                  background: 'transparent',
                   color: activeTab === tab ? 'var(--primary-color)' : 'var(--text-dark)',
                   fontWeight: activeTab === tab ? '600' : '500',
                   padding: '8px 16px',
-                  borderRadius: 'calc(var(--radius-sm) - 2px)',
+                  borderRadius: '999px',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
-                  boxShadow: activeTab === tab ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
-                  transition: 'var(--transition)'
+                  transition: 'color 0.25s ease'
                 }}
               >
                 {tab} {tab === 'All' ? `(${totalRequests})` : tab === 'Pending' ? `(${pendingCount})` : tab === 'Approved' ? `(${approvedCount})` : `(${rejectedCount})`}
