@@ -99,10 +99,11 @@ function DashboardOverview() {
         </div>
         <button 
           onClick={handleSeed} 
-          className="btn btn-primary"
+          className="btn btn-warning"
           disabled={seeding}
         >
-          {seeding ? 'Seeding Database...' : '🔄 Reset & Seed Database'}
+          <img src="/images/reset_icon.png" alt="Reset" style={{ width: '18px', height: '18px', filter: 'brightness(0) invert(1)' }} />
+          {seeding ? 'Seeding Database...' : 'Reset & Seed Database'}
         </button>
       </div>
 

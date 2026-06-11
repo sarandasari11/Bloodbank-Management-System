@@ -233,7 +233,8 @@ function RequestManagement() {
             setShowAddModal(true);
           }}
         >
-          ➕ Submit Blood Request
+          <img src="/images/request_icon.png" alt="Request" style={{ width: '18px', height: '18px', filter: 'brightness(0) invert(1)' }} />
+          Submit Blood Request
         </button>
       </div>
 

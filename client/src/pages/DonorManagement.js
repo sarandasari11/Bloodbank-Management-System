@@ -107,7 +107,8 @@ function DonorManagement() {
           className="btn btn-warning" 
           onClick={() => setShowAddModal(true)}
         >
-          ➕ Register New Donor
+          <img src="/images/donor_icon.png" alt="Donor" style={{ width: '18px', height: '18px', filter: 'brightness(0) invert(1)' }} />
+          Register New Donor
         </button>
       </div>
 

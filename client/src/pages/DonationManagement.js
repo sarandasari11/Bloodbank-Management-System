@@ -120,7 +120,8 @@ function DonationManagement() {
             setShowAddModal(true);
           }}
         >
-          ➕ Record New Donation
+          <img src="/images/donor_icon.png" alt="Donation" style={{ width: '18px', height: '18px', filter: 'brightness(0) invert(1)' }} />
+          Record New Donation
         </button>
       </div>
 
