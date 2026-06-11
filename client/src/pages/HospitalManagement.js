@@ -101,7 +101,7 @@ function HospitalManagement() {
           className="btn btn-warning" 
           onClick={() => setShowAddModal(true)}
         >
-          <img src="/images/request_icon.png" alt="Hospital" style={{ width: '18px', height: '18px', filter: 'brightness(0) invert(1)' }} />
+          <img src="/images/request_icon.png" alt="Hospital" style={{ width: '22px', height: '22px' }} />
           Register Partner Hospital
         </button>
       </div>

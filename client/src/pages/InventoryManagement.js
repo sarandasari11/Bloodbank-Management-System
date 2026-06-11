@@ -67,7 +67,7 @@ function InventoryManagement() {
             setShowOverrideModal(true);
           }}
         >
-          <img src="/images/add_icon.png" alt="Override" style={{ width: '18px', height: '18px', filter: 'brightness(0) invert(1)' }} />
+          <img src="/images/add_icon.png" alt="Override" style={{ width: '22px', height: '22px' }} />
           Manual Stock Override
         </button>
       </div>

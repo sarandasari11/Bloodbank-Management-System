@@ -102,7 +102,7 @@ function DashboardOverview() {
           className="btn btn-warning"
           disabled={seeding}
         >
-          <img src="/images/reset_icon.png" alt="Reset" style={{ width: '18px', height: '18px', filter: 'brightness(0) invert(1)' }} />
+          <img src="/images/reset_icon.png" alt="Reset" style={{ width: '22px', height: '22px' }} />
           {seeding ? 'Seeding Database...' : 'Reset & Seed Database'}
         </button>
       </div>
@@ -345,16 +345,16 @@ function DashboardOverview() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '15px' }}>
             <Link to="/inventory" className="btn btn-warning" style={{ textDecoration: 'none', textAlign: 'center' }}>
-              📊 View Inventory Stock
+              <img src="/images/add_icon.png" alt="Override" style={{ width: '22px', height: '22px' }} /> View Inventory Stock
             </Link>
             <Link to="/donors" className="btn btn-warning" style={{ textDecoration: 'none', textAlign: 'center' }}>
-              🧑 Add / Manage Donors
+              <img src="/images/donor_icon.png" alt="Donor" style={{ width: '22px', height: '22px'}} /> Add / Manage Donors
             </Link>
             <Link to="/donations" className="btn btn-warning" style={{ textDecoration: 'none', textAlign: 'center' }}>
-              💉 Record New Donation
+              <img src="/images/donor_icon.png" alt="Donation" style={{ width: '22px', height: '22px'}} /> Record New Donation
             </Link>
             <Link to="/requests" className="btn btn-warning" style={{ textDecoration: 'none', textAlign: 'center' }}>
-              📋 Approve Hospital Requests
+              <img src="/images/request_icon.png" alt="Request" style={{ width: '22px', height: '22px' }} /> Approve Hospital Requests
             </Link>
           </div>
         </div>
