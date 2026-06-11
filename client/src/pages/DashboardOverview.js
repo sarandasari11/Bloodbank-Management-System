@@ -342,16 +342,16 @@ function DashboardOverview() {
             Operations Quick Links
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '15px' }}>
-            <Link to="/inventory" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+            <Link to="/inventory" className="btn btn-warning" style={{ textDecoration: 'none', textAlign: 'center' }}>
               📊 View Inventory Stock
             </Link>
-            <Link to="/donors" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+            <Link to="/donors" className="btn btn-warning" style={{ textDecoration: 'none', textAlign: 'center' }}>
               🧑 Add / Manage Donors
             </Link>
-            <Link to="/donations" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+            <Link to="/donations" className="btn btn-warning" style={{ textDecoration: 'none', textAlign: 'center' }}>
               💉 Record New Donation
             </Link>
-            <Link to="/requests" className="btn btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+            <Link to="/requests" className="btn btn-warning" style={{ textDecoration: 'none', textAlign: 'center' }}>
               📋 Approve Hospital Requests
             </Link>
           </div>

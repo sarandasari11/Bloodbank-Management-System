@@ -58,7 +58,7 @@ function InventoryManagement() {
           <p className="page-subtitle">View and configure current stock levels across all blood groups</p>
         </div>
         <button 
-          className="btn btn-primary" 
+          className="btn btn-warning" 
           onClick={() => {
             const currentItem = inventory.find(i => i.bloodGroup === bloodGroup);
             if (currentItem) {

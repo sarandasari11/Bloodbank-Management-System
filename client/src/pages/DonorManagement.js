@@ -104,7 +104,7 @@ function DonorManagement() {
           <p className="page-subtitle">Register new donors and manage the donor database</p>
         </div>
         <button 
-          className="btn btn-primary" 
+          className="btn btn-warning" 
           onClick={() => setShowAddModal(true)}
         >
           ➕ Register New Donor

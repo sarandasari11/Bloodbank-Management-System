@@ -112,7 +112,7 @@ function DonationManagement() {
           <p className="page-subtitle">Track blood donation receipts and update inventory stock</p>
         </div>
         <button 
-          className="btn btn-primary" 
+          className="btn btn-warning" 
           onClick={() => {
             if (donors.length > 0 && !selectedDonorId) {
               setSelectedDonorId(donors[0]._id);

@@ -225,7 +225,7 @@ function RequestManagement() {
           <p className="page-subtitle">Process hospital blood unit requirements and coordinate approvals</p>
         </div>
         <button 
-          className="btn btn-primary" 
+          className="btn btn-warning" 
           onClick={() => {
             if (hospitals.length > 0 && !selectedHospitalId) {
               setSelectedHospitalId(hospitals[0]._id);

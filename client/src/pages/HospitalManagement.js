@@ -98,7 +98,7 @@ function HospitalManagement() {
           <p className="page-subtitle">Configure partner medical institutions and request portals</p>
         </div>
         <button 
-          className="btn btn-primary" 
+          className="btn btn-warning" 
           onClick={() => setShowAddModal(true)}
         >
           ➕ Register Partner Hospital
