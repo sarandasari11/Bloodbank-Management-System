@@ -19,121 +19,75 @@ router.post('/seed', async (req, res) => {
 
     // 1. Seed Inventory
     const initialInventory = [
-      { bloodGroup: 'A+', unitsAvailable: 10 },
-      { bloodGroup: 'A-', unitsAvailable: 5 },
-      { bloodGroup: 'B+', unitsAvailable: 15 },
-      { bloodGroup: 'B-', unitsAvailable: 8 },
+      { bloodGroup: 'A+', unitsAvailable: 15 },
+      { bloodGroup: 'A-', unitsAvailable: 8 },
+      { bloodGroup: 'B+', unitsAvailable: 22 },
+      { bloodGroup: 'B-', unitsAvailable: 6 },
       { bloodGroup: 'AB+', unitsAvailable: 12 },
-      { bloodGroup: 'AB-', unitsAvailable: 4 },
-      { bloodGroup: 'O+', unitsAvailable: 20 },
+      { bloodGroup: 'AB-', unitsAvailable: 3 },
+      { bloodGroup: 'O+', unitsAvailable: 28 },
       { bloodGroup: 'O-', unitsAvailable: 10 }
     ];
-    const seededInventory = await Inventory.insertMany(initialInventory);
+    await Inventory.insertMany(initialInventory);
 
     // 2. Seed Donors
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    const dateWeeksAgo = (weeks) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (weeks * 7));
+      return d;
+    };
 
     const donorsData = [
-      {
-        name: 'John Doe',
-        age: 32,
-        gender: 'Male',
-        bloodGroup: 'A+',
-        phone: '123-456-7890',
-        address: '123 Elm St',
-        lastDonation: threeMonthsAgo
-      },
-      {
-        name: 'Jane Smith',
-        age: 28,
-        gender: 'Female',
-        bloodGroup: 'O-',
-        phone: '987-654-3210',
-        address: '456 Oak St',
-        lastDonation: oneMonthAgo
-      },
-      {
-        name: 'Robert Johnson',
-        age: 45,
-        gender: 'Male',
-        bloodGroup: 'B+',
-        phone: '555-555-5555',
-        address: '789 Pine St',
-        lastDonation: null
-      }
+      { name: 'John Doe', age: 32, gender: 'Male', bloodGroup: 'A+', phone: '123-456-7890', address: '123 Elm St', lastDonation: dateWeeksAgo(12) },
+      { name: 'Jane Smith', age: 28, gender: 'Female', bloodGroup: 'O-', phone: '987-654-3210', address: '456 Oak St', lastDonation: dateWeeksAgo(4) },
+      { name: 'Robert Johnson', age: 45, gender: 'Male', bloodGroup: 'B+', phone: '555-0199', address: '789 Pine St', lastDonation: null },
+      { name: 'Alice Williams', age: 36, gender: 'Female', bloodGroup: 'AB+', phone: '555-0144', address: '101 Cedar Ln', lastDonation: dateWeeksAgo(8) },
+      { name: 'Michael Brown', age: 50, gender: 'Male', bloodGroup: 'O+', phone: '555-0177', address: '202 Maple Dr', lastDonation: dateWeeksAgo(1) },
+      { name: 'Emily Davis', age: 24, gender: 'Female', bloodGroup: 'A-', phone: '555-0111', address: '303 Birch Rd', lastDonation: null },
+      { name: 'William Wilson', age: 41, gender: 'Male', bloodGroup: 'B-', phone: '555-0122', address: '404 Walnut Ave', lastDonation: dateWeeksAgo(6) },
+      { name: 'Olivia Martinez', age: 29, gender: 'Female', bloodGroup: 'AB-', phone: '555-0133', address: '505 Cherry Ct', lastDonation: null },
+      { name: 'David Anderson', age: 33, gender: 'Male', bloodGroup: 'O+', phone: '555-0155', address: '606 Ash Way', lastDonation: dateWeeksAgo(2) },
+      { name: 'Sophia Taylor', age: 31, gender: 'Female', bloodGroup: 'A+', phone: '555-0166', address: '707 Redwood Blvd', lastDonation: dateWeeksAgo(16) }
     ];
     const seededDonors = await Donor.insertMany(donorsData);
 
     // 3. Seed Hospitals
     const hospitalsData = [
-      {
-        hospitalName: 'City General Hospital',
-        contactPerson: 'Dr. Sarah Connor',
-        phone: '111-222-3333',
-        address: '100 Medical Plaza'
-      },
-      {
-        hospitalName: 'St. Jude Research Hospital',
-        contactPerson: 'Dr. Marcus Aurelius',
-        phone: '444-555-6666',
-        address: '200 Hope Way'
-      },
-      {
-        hospitalName: 'Grace Valley Clinic',
-        contactPerson: 'Nurse Jackie',
-        phone: '777-888-9999',
-        address: '300 Peace Dr'
-      }
+      { hospitalName: 'City General Hospital', contactPerson: 'Dr. Sarah Connor', phone: '111-222-3333', address: '100 Medical Plaza' },
+      { hospitalName: 'St. Jude Research Hospital', contactPerson: 'Dr. Marcus Aurelius', phone: '444-555-6666', address: '200 Hope Way' },
+      { hospitalName: 'Grace Valley Clinic', contactPerson: 'Nurse Jackie', phone: '777-888-9999', address: '300 Peace Dr' },
+      { hospitalName: 'Metropolitan Trauma Center', contactPerson: 'Dr. Gregory House', phone: '555-9111', address: '400 Healing Blvd' },
+      { hospitalName: 'Sacred Heart Hospital', contactPerson: 'Dr. John Dorian', phone: '555-2468', address: '500 Mercy Ave' },
+      { hospitalName: 'Mercy Childrens Clinic', contactPerson: 'Dr. Arizona Robbins', phone: '555-7362', address: '600 Rainbow Lane' }
     ];
     const seededHospitals = await Hospital.insertMany(hospitalsData);
 
     // 4. Seed Past Donations
     const donationsData = [
-      {
-        donorId: seededDonors[0]._id,
-        bloodGroup: 'A+',
-        unitsDonated: 1,
-        donationDate: threeMonthsAgo
-      },
-      {
-        donorId: seededDonors[1]._id,
-        bloodGroup: 'O-',
-        unitsDonated: 2,
-        donationDate: oneMonthAgo
-      }
+      { donorId: seededDonors[0]._id, bloodGroup: 'A+', unitsDonated: 2, donationDate: dateWeeksAgo(12) },
+      { donorId: seededDonors[1]._id, bloodGroup: 'O-', unitsDonated: 1, donationDate: dateWeeksAgo(4) },
+      { donorId: seededDonors[3]._id, bloodGroup: 'AB+', unitsDonated: 3, donationDate: dateWeeksAgo(8) },
+      { donorId: seededDonors[4]._id, bloodGroup: 'O+', unitsDonated: 2, donationDate: dateWeeksAgo(1) },
+      { donorId: seededDonors[6]._id, bloodGroup: 'B-', unitsDonated: 1, donationDate: dateWeeksAgo(6) },
+      { donorId: seededDonors[8]._id, bloodGroup: 'O+', unitsDonated: 3, donationDate: dateWeeksAgo(2) },
+      { donorId: seededDonors[9]._id, bloodGroup: 'A+', unitsDonated: 2, donationDate: dateWeeksAgo(16) }
     ];
     await Donation.insertMany(donationsData);
 
     // 5. Seed Blood Requests
-    const twoDaysAgo = new Date();
-    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-
-    const fiveDaysAgo = new Date();
-    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
-
     const requestsData = [
-      {
-        hospitalId: seededHospitals[0]._id,
-        bloodGroup: 'B+',
-        unitsRequired: 3,
-        requestDate: twoDaysAgo,
-        status: 'Pending'
-      },
-      {
-        hospitalId: seededHospitals[1]._id,
-        bloodGroup: 'A+',
-        unitsRequired: 2,
-        requestDate: fiveDaysAgo,
-        status: 'Approved' // Assumed to be already processed
-      }
+      { hospitalId: seededHospitals[0]._id, bloodGroup: 'B+', unitsRequired: 4, requestDate: dateWeeksAgo(2), status: 'Pending' },
+      { hospitalId: seededHospitals[1]._id, bloodGroup: 'A+', unitsRequired: 2, requestDate: dateWeeksAgo(5), status: 'Approved' },
+      { hospitalId: seededHospitals[2]._id, bloodGroup: 'O-', unitsRequired: 3, requestDate: dateWeeksAgo(1), status: 'Pending' },
+      { hospitalId: seededHospitals[3]._id, bloodGroup: 'AB-', unitsRequired: 1, requestDate: dateWeeksAgo(3), status: 'Approved' },
+      { hospitalId: seededHospitals[4]._id, bloodGroup: 'O+', unitsRequired: 5, requestDate: dateWeeksAgo(4), status: 'Rejected' },
+      { hospitalId: seededHospitals[5]._id, bloodGroup: 'A-', unitsRequired: 2, requestDate: dateWeeksAgo(2), status: 'Pending' },
+      { hospitalId: seededHospitals[0]._id, bloodGroup: 'B-', unitsRequired: 3, requestDate: dateWeeksAgo(7), status: 'Approved' },
+      { hospitalId: seededHospitals[1]._id, bloodGroup: 'AB+', unitsRequired: 4, requestDate: dateWeeksAgo(6), status: 'Rejected' }
     ];
     await BloodRequest.insertMany(requestsData);
 
-    res.json({ message: 'Database seeded successfully with clean relational dummy data!' });
+    res.json({ message: 'Database seeded successfully with rich, diverse relational mock data!' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
